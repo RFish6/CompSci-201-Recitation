@@ -1,0 +1,258 @@
+import java.util.Stack;
+
+
+public class MidtermPracticeSolution {
+
+	private class TreeNode {
+
+		public int val;
+		public TreeNode left;
+		public TreeNode right;
+
+		public TreeNode(int v, TreeNode l, TreeNode r) {
+
+			val = v;
+			left = l;
+			right = r;
+		}
+
+	}
+
+	private class ListNode {
+
+		public int val;
+		public ListNode next;
+
+		public ListNode(int v, ListNode n) {
+
+			val = v;
+			next = n;
+		}
+
+	}
+
+	//Test your methods
+	public static void main(String[] args) {
+		MidtermPractice mp = new MidtermPractice();
+		System.out.println(mp.countWays(6));
+	}
+
+	/* A child is running up a staircase with nn steps, and can hop either 1 step,
+	2 steps, or 3 steps at a time. Implement a method to count how many possible ways
+	the child can run up the stairs
+	 */
+	public int countWays(int n) {
+		if(n < 0) {
+			return 0;
+		}
+		else if(n == 0) {
+			return 1;
+		}
+		else{
+			return countWays(n-1) + countWays(n-2) + countWays(n-3);
+		}
+	}
+
+	/*Check to see if the left and right subtree are a mirror
+	That means that if the left tree has a left child, the right tree must
+	have a right child in the same spot with the same value
+	 */
+	public boolean isMirror(TreeNode root) {
+		if(root == null) {
+			return true;
+		}
+		return isMirrorHelper(root.left, root.right);
+	}
+
+	private boolean isMirrorHelper(TreeNode left, TreeNode right) {
+		if(left == null) {
+			return right == null;
+		}
+		else if(right == null) {
+			return false;
+		}
+
+		if(left.val != right.val) {
+			return false;
+		}
+		boolean dirOne = isMirrorHelper(left.left, right.right);
+		boolean dirTwo = isMirrorHelper(left.right, right.left);
+
+		return dirOne && dirTwo;
+
+	}
+
+	/*Implement a function to check if a binary tree is balanced.  A balanced tree
+		is defined to be a tree such that the heights of the 2 subtrees of any node 
+		never differ by more than 1
+	 */
+	
+	public boolean isBalanced(TreeNode root) {
+		if(root == null) {
+			return true;
+		}
+		
+		int hDiff = getHeight(root.left) - getHeight(root.right);
+		if(Math.abs(hDiff) > 1) {
+			return false;
+		}
+		else {
+			return isBalanced(root.left) && isBalanced(root.right);
+		}
+	}
+	
+	private int getHeight(TreeNode root) {
+		if(root == null) {
+			return 0;
+		}
+		return 1 + Math.max(getHeight(root.left), getHeight(root.right));
+	}
+	
+	
+	public boolean isBalancedOptimized(TreeNode root) {
+		if(checkHeight(root) == -1) {
+			return false;
+		}
+		else {
+			return true;
+		}
+	}
+
+	private int checkHeight(TreeNode root) {
+		if(root == null) {
+			return 0;
+		}
+
+		int leftHeight = checkHeight(root.left);
+		if(leftHeight == -1) {
+			return -1; //not balanced
+		}
+
+		int rightHeight = checkHeight(root.right);
+		if(rightHeight == -1) {
+			return -1; //not balanced
+		}
+
+		int heightDiff = leftHeight - rightHeight;
+		if(Math.abs(heightDiff) > 1) {
+			return -1; //not balanced
+		}
+		else {
+			return Math.max(leftHeight, rightHeight) + 1;
+		}
+	}
+
+	/*Find the first common ancestor of 2 nodes in a binary tree.
+	 * Assume p and q are in the tree
+	 */
+	public TreeNode commonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+		if(root == null) {
+			return null;
+		}
+		if(root == p || root == q) {
+			return root;
+		}
+		
+		boolean isPLeft = isDescendent(root.left, p);
+		boolean isQLeft = isDescendent(root.left, q);
+		
+		//if p and q are on different sides return root
+		if(isPLeft != isQLeft) {
+			return root;
+		}
+		
+		//traverse side they are on
+		if(isPLeft == true) {
+			return commonAncestor(root.left, p, q);
+		}
+		else {
+			return commonAncestor(root.right, p, q);
+		}
+	}
+	
+	private boolean isDescendent(TreeNode root, TreeNode p) {
+		if(root == null) {
+			return false;
+		}
+		if(root == p) {
+			return true;
+		}
+		
+		return isDescendent(root.left, p) || isDescendent(root.right, p);
+	}
+
+	//interatively find if a linked list is a palindrome
+	public boolean isPalindromeIter(ListNode head) {
+		Stack<Integer> st = new Stack<>();
+		ListNode fast = head;
+		ListNode slow = head;
+		
+		while(fast != null && fast.next != null) {
+			st.push(slow.val);
+			slow = slow.next;
+			fast = fast.next.next;
+		}
+		//list has odd number of elements so skip middle element
+		if(fast != null) {
+			slow = slow.next;
+		}
+		
+		while(slow != null) {
+			int top = st.pop();
+			
+			if(top != slow.val) {
+				return false;
+			}
+			slow = slow.next;
+		}
+		
+		return true;
+	}
+
+	//recursively find if a linked list is a palindrome
+	public boolean isPalindrome(ListNode head) {
+		int length = 0;
+		ListNode cur = head;
+		while(cur != null) {
+			length++;
+			cur = cur.next;
+		}
+		PalinRes p = isPalinHelper(head, length);
+		return p.result;
+	}	
+
+	private PalinRes isPalinHelper(ListNode head, int length) {
+		if(head == null || length == 0) {
+			return new PalinRes(null, true);
+		}
+		else if(length == 1) {
+			return new PalinRes(head.next, true);
+		}
+		else if(length == 2) {
+			return new PalinRes(head.next.next, head.val == head.next.val);
+		}
+
+		PalinRes res = isPalinHelper(head.next, length - 2);
+		if(!res.result || res.node == null) {
+			return res;
+		}
+		else {
+			res.result = head.val == res.node.val;
+			res.node = res.node.next;
+			return res;
+		}
+	}
+
+	//needed for palindrome recursive helper method
+	private class PalinRes {
+		ListNode node;
+		boolean result;
+
+		public PalinRes(ListNode n, boolean r) {
+			node = n;
+			result = r;
+		}
+	}
+
+}
+
