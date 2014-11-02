@@ -74,6 +74,17 @@ public class MidtermPractice {
 
 	}	
 	
+	//needed for palindrome recursvive helper method
+	private class PalinRes {
+		ListNode node;
+		boolean result;
+
+		public PalinRes(ListNode n, boolean r) {
+			node = n;
+			result = r;
+		}
+	}
+	
 }
 
 	
